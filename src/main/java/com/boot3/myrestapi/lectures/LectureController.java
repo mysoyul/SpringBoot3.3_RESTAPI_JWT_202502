@@ -1,12 +1,14 @@
 package com.boot3.myrestapi.lectures;
 
 import com.boot3.myrestapi.lectures.dto.LectureReqDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +28,18 @@ public class LectureController {
 //        this.lectureRepository = lectureRepository;
 //    }
 
+    /* 
+       @Valid 어노테이션 - Data Binding 하고 검증 역할을 하는 Validator 를 호출하는 역할
+       Errors - 입력항목 검증 시 Error 정보를 저장하거나 조회 해주는 역할을 담당하는 객체
+     */
     @PostMapping
-    public ResponseEntity<?> createLecture(@RequestBody LectureReqDto lectureReqDto) {
+    public ResponseEntity<?> createLecture(@RequestBody @Valid LectureReqDto lectureReqDto,
+                                           Errors errors) {
+        //입력항목 검증 시 Error 가 발생 했나요?
+        if(errors.hasErrors()) {
+            //400 에러 발생시킴
+            return ResponseEntity.badRequest().body(errors);
+        }
         //ReqDTO => Entity 매핑
         Lecture lecture = modelMapper.map(lectureReqDto, Lecture.class);
         //테이블에 Insert
