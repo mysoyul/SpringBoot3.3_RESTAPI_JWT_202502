@@ -51,6 +51,8 @@ public class LectureController {
 
         //ReqDTO => Entity 매핑
         Lecture lecture = modelMapper.map(lectureReqDto, Lecture.class);
+        //free, offline 값 업데이트
+        lecture.update();
         //테이블에 Insert
         Lecture addedLecture = this.lectureRepository.save(lecture);
         //Link 생성하는 역할을 담당하는 객체 http://localhost:8080/api/lectures/10
