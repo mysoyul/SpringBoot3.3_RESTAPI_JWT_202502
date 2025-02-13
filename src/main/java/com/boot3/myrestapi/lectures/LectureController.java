@@ -1,6 +1,7 @@
 package com.boot3.myrestapi.lectures;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -17,6 +18,7 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class LectureController {
     private final LectureRepository lectureRepository;
+    private final ModelMapper modelMapper;
 
     //Constructor Injection
 //    public LectureController(LectureRepository lectureRepository) {
