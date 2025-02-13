@@ -1,6 +1,7 @@
 package com.boot3.myrestapi.lectures;
 
 import com.boot3.myrestapi.lectures.dto.LectureReqDto;
+import com.boot3.myrestapi.lectures.validator.LectureValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,6 +23,7 @@ import java.net.URI;
 public class LectureController {
     private final LectureRepository lectureRepository;
     private final ModelMapper modelMapper;
+    private final LectureValidator validator;
 
     //Constructor Injection
 //    public LectureController(LectureRepository lectureRepository) {
@@ -37,9 +39,16 @@ public class LectureController {
                                            Errors errors) {
         //입력항목 검증 시 Error 가 발생 했나요?
         if(errors.hasErrors()) {
-            //400 에러 발생시킴
-            return ResponseEntity.badRequest().body(errors);
+            return getErrors(errors);
         }
+
+        //Biz 로직 입력항목 검증 - LectureValidator 호출
+        validator.validate(lectureReqDto, errors);
+        if(errors.hasErrors()) {
+            //400 에러 발생시킴
+            return getErrors(errors);
+        }
+
         //ReqDTO => Entity 매핑
         Lecture lecture = modelMapper.map(lectureReqDto, Lecture.class);
         //테이블에 Insert
@@ -52,5 +61,10 @@ public class LectureController {
         //ResponseEntity = body + header + statusCode
         //created() : statusCode를 201로 설정하고, 위에서 생성한 Link를 Response location 헤더로 설정한다.
         return ResponseEntity.created(createUri).body(addedLecture);
+    }
+
+    private static ResponseEntity<?> getErrors(Errors errors) {
+        //400 에러 발생시킴
+        return ResponseEntity.badRequest().body(errors);
     }
 }

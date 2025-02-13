@@ -9,10 +9,10 @@ import java.time.LocalDateTime;
 @Component
 public class LectureValidator {
 	public void validate(LectureReqDto lectureReqDto, Errors errors) {
-		//maxPrice 0 보다 크면 maxPrice > basePrice 보다 커야 함
+		//maxPrice 가 있을때 basePrice > maxPrice 큰 값이면 오류발생
 		if(lectureReqDto.getBasePrice() > lectureReqDto.getMaxPrice() &&
 				lectureReqDto.getMaxPrice() != 0) {
-			//Field Error
+			//Field Error 발생시킴
 			errors.rejectValue("basePrice", "wrongValue", "BasePrice is wrong");
 			errors.rejectValue("maxPrice", "wrongValue", "MaxPrice is wrong");
 			//Global Error
