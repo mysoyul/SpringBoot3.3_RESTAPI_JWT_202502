@@ -1,6 +1,8 @@
 package com.boot3.myrestapi.lectures;
 
 import com.boot3.myrestapi.lectures.dto.LectureReqDto;
+import com.boot3.myrestapi.lectures.dto.LectureResDto;
+import com.boot3.myrestapi.lectures.dto.LectureResource;
 import com.boot3.myrestapi.lectures.validator.LectureValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping(value = "/api/lectures", produces = MediaTypes.HAL_JSON_VALUE)
@@ -55,14 +59,23 @@ public class LectureController {
         lecture.update();
         //테이블에 Insert
         Lecture addedLecture = this.lectureRepository.save(lecture);
+        //Entity => ResDto 로 매핑
+        LectureResDto lectureResDto = modelMapper.map(addedLecture, LectureResDto.class);
+
         //Link 생성하는 역할을 담당하는 객체 http://localhost:8080/api/lectures/10
         WebMvcLinkBuilder selfLinkBuilder =
-                WebMvcLinkBuilder.linkTo(LectureController.class).slash(addedLecture.getId());
+                linkTo(LectureController.class).slash(lectureResDto.getId());
         //생성된 Link를 URL 형식으로 생성해줌
         URI createUri = selfLinkBuilder.toUri();
+
+        LectureResource lectureResource = new LectureResource(lectureResDto);
+        lectureResource.add(linkTo(LectureController.class).withRel("query-lectures"));
+        lectureResource.add(selfLinkBuilder.withSelfRel());
+        lectureResource.add(selfLinkBuilder.withRel("update-lecture"));
+
         //ResponseEntity = body + header + statusCode
         //created() : statusCode를 201로 설정하고, 위에서 생성한 Link를 Response location 헤더로 설정한다.
-        return ResponseEntity.created(createUri).body(addedLecture);
+        return ResponseEntity.created(createUri).body(lectureResource);
     }
 
     private static ResponseEntity<?> getErrors(Errors errors) {
