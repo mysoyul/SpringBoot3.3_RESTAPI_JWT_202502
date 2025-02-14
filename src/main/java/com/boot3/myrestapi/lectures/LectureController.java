@@ -71,8 +71,6 @@ public class LectureController {
         LectureResource lectureResource = new LectureResource(lectureResDto);
         //query-lectures 라는 이름을 갖는 링크 생성
         lectureResource.add(linkTo(LectureController.class).withRel("query-lectures"));
-        //self link 생성
-        lectureResource.add(selfLinkBuilder.withSelfRel());
         lectureResource.add(selfLinkBuilder.withRel("update-lecture"));
 
         //ResponseEntity = body + header + statusCode
