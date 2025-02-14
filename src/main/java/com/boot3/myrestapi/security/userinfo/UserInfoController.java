@@ -24,13 +24,17 @@ public class UserInfoController {
 
     @PostMapping("/login")
     public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+        //인증처리
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.getEmail(),
                         authRequest.getPassword()
                 ));
+        //인증 성공
         if (authentication.isAuthenticated()) {
+            //토큰생성
             return jwtService.generateToken(authRequest.getEmail());
+        //인증 실패    
         } else {
             throw new UsernameNotFoundException("invalid user request !");
         }
