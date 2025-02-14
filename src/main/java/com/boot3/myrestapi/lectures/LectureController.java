@@ -136,18 +136,18 @@ public class LectureController {
         if (errors.hasErrors()) {
             return getErrors(errors);
         }
+
         validator.validate(lectureReqDto, errors);
         if (errors.hasErrors()) {
             return getErrors(errors);
         }
-
+        //ReqDto => Entity 매핑
         this.modelMapper.map(lectureReqDto, existingLecture);
         existingLecture.update();
         Lecture savedLecture = this.lectureRepository.save(existingLecture);
+        //Entity => ResDto 매핑
         LectureResDto lectureResDto = modelMapper.map(savedLecture, LectureResDto.class);
-
-        LectureResource lectureResource = new LectureResource(lectureResDto);
-        return ResponseEntity.ok(lectureResource);
+        return ResponseEntity.ok(new LectureResource(lectureResDto));
     }
 
     private static ResponseEntity<?> getErrors(Errors errors) {
