@@ -40,7 +40,7 @@ public class JwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-
+    //PayLoad의 "sub": "user@aa.com", subject에 매핑된 Email 주소 추출하기
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -55,7 +55,9 @@ public class JwtService {
 
     //JWT 토큰 검증
     public Boolean validateToken(String token, UserDetails userDetails) {
+        //토큰에 포함된 email 주소 추출
         final String username = extractUsername(token);
+        //UserDetails 포함된 email 주소와 토큰에 포함된 email 주소 비교
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
