@@ -1,5 +1,6 @@
 package com.boot3.myrestapi.lectures;
 
+import com.boot3.myrestapi.common.exception.BusinessException;
 import com.boot3.myrestapi.common.serializer.ErrorsResource;
 import com.boot3.myrestapi.lectures.dto.LectureReqDto;
 import com.boot3.myrestapi.lectures.dto.LectureResDto;
@@ -16,6 +17,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -108,14 +110,17 @@ public class LectureController {
     @GetMapping("/{id}")
     public ResponseEntity getLecture(@PathVariable Integer id) {
         Optional<Lecture> optionalLecture = this.lectureRepository.findById(id);
-        if(optionalLecture.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
 
-        Lecture lecture = optionalLecture.get();
+        String errMsg = String.format("Id = %d Lecture Not Found", id);
+        //Optional에 저장된 객체가 null 이면 Exception 발생, null 이 아니면 Entity 객체를 반환
+        Lecture lecture = optionalLecture
+                .orElseThrow(() -> new BusinessException(errMsg, HttpStatus.NOT_FOUND));
+//        if(optionalLecture.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
+//        Lecture lecture = optionalLecture.get();
         LectureResDto lectureResDto = modelMapper.map(lecture, LectureResDto.class);
-        LectureResource lectureResource = new LectureResource(lectureResDto);
-        return ResponseEntity.ok(lectureResource);
+        return ResponseEntity.ok(new LectureResource(lectureResDto));
     }
 
     private static ResponseEntity<?> getErrors(Errors errors) {
