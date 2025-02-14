@@ -9,14 +9,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -77,6 +77,20 @@ public class LectureController {
         //ResponseEntity = body + header + statusCode
         //created() : statusCode를 201로 설정하고, 위에서 생성한 Link를 Response location 헤더로 설정한다.
         return ResponseEntity.created(createUri).body(lectureResource);
+    }
+
+    /*
+        HATEOAS PagedResourcesAssembler 는 Page(paging data) 를 PagedModel(paging data + Link) 로 변환
+        public PagedModel<EntityModel<T>> toModel(Page<T> entity)
+     */
+    @GetMapping
+    public ResponseEntity queryLectures(Pageable pageable,
+                                        PagedResourcesAssembler<LectureResDto> assembler) {
+        Page<Lecture> lecturePage = this.lectureRepository.findAll(pageable);
+        Page<LectureResDto> lectureResDtoPage =
+                //Page<U> map(Function<? super T,? extends U> converter)
+                lecturePage.map(lecture -> modelMapper.map(lecture, LectureResDto.class));
+        return ResponseEntity.ok(lecturePage);
     }
 
     private static ResponseEntity<?> getErrors(Errors errors) {
