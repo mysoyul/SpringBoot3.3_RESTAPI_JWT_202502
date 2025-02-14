@@ -6,12 +6,14 @@ import com.boot3.myrestapi.lectures.LectureStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.stream.IntStream;
 
 @Component
+@Profile("prod")
 public class LectureInsertRunner implements ApplicationRunner {
     @Autowired
     LectureRepository lectureRepository;
@@ -20,7 +22,8 @@ public class LectureInsertRunner implements ApplicationRunner {
    public void run(ApplicationArguments args) throws Exception {
       //IntStream.forEach(IntConsumer) IntConsumer의 추상메서드 void accept(int value)
       //IntStream.range(0, 15).forEach(value -> generateLecture(value));
-      IntStream.rangeClosed(1, 15).forEach(this::generateLecture);
+      IntStream.rangeClosed(1, 15)
+              .forEach(this::generateLecture);
     }
 	
     private void generateLecture(int index) {
