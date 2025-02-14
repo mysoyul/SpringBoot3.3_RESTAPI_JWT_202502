@@ -123,6 +123,33 @@ public class LectureController {
         return ResponseEntity.ok(new LectureResource(lectureResDto));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity updateLecture(@PathVariable Integer id,
+                                        @RequestBody @Valid LectureReqDto lectureReqDto,
+                                        Errors errors) {
+        Optional<Lecture> optionalLecture = this.lectureRepository.findById(id);
+
+        String errMsg = String.format("Id = %d Lecture Not Found", id);
+        Lecture existingLecture =
+                optionalLecture.orElseThrow(() -> new BusinessException(errMsg, HttpStatus.NOT_FOUND));
+
+        if (errors.hasErrors()) {
+            return getErrors(errors);
+        }
+        validator.validate(lectureReqDto, errors);
+        if (errors.hasErrors()) {
+            return getErrors(errors);
+        }
+
+        this.modelMapper.map(lectureReqDto, existingLecture);
+        existingLecture.update();
+        Lecture savedLecture = this.lectureRepository.save(existingLecture);
+        LectureResDto lectureResDto = modelMapper.map(savedLecture, LectureResDto.class);
+
+        LectureResource lectureResource = new LectureResource(lectureResDto);
+        return ResponseEntity.ok(lectureResource);
+    }
+
     private static ResponseEntity<?> getErrors(Errors errors) {
         //400 에러 발생시킴
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
