@@ -109,12 +109,7 @@ public class LectureController {
 
     @GetMapping("/{id}")
     public ResponseEntity getLecture(@PathVariable Integer id) {
-        Optional<Lecture> optionalLecture = this.lectureRepository.findById(id);
-
-        String errMsg = String.format("Id = %d Lecture Not Found", id);
-        //Optional에 저장된 객체가 null 이면 Exception 발생, null 이 아니면 Entity 객체를 반환
-        Lecture lecture = optionalLecture
-                .orElseThrow(() -> new BusinessException(errMsg, HttpStatus.NOT_FOUND));
+        Lecture lecture = getLectureExistOrElseThrow(id);
 //        if(optionalLecture.isEmpty()) {
 //            return ResponseEntity.notFound().build();
 //        }
@@ -123,15 +118,20 @@ public class LectureController {
         return ResponseEntity.ok(new LectureResource(lectureResDto));
     }
 
+    private Lecture getLectureExistOrElseThrow(Integer id) {
+        Optional<Lecture> optionalLecture = this.lectureRepository.findById(id);
+        String errMsg = String.format("Id = %d Lecture Not Found", id);
+        //Optional에 저장된 객체가 null 이면 Exception 발생, null 이 아니면 Entity 객체를 반환
+        Lecture lecture = optionalLecture
+                .orElseThrow(() -> new BusinessException(errMsg, HttpStatus.NOT_FOUND));
+        return lecture;
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity updateLecture(@PathVariable Integer id,
                                         @RequestBody @Valid LectureReqDto lectureReqDto,
                                         Errors errors) {
-        Optional<Lecture> optionalLecture = this.lectureRepository.findById(id);
-
-        String errMsg = String.format("Id = %d Lecture Not Found", id);
-        Lecture existingLecture =
-                optionalLecture.orElseThrow(() -> new BusinessException(errMsg, HttpStatus.NOT_FOUND));
+        Lecture existingLecture = getLectureExistOrElseThrow(id);
 
         if (errors.hasErrors()) {
             return getErrors(errors);
