@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -87,10 +89,19 @@ public class LectureController {
     public ResponseEntity queryLectures(Pageable pageable,
                                         PagedResourcesAssembler<LectureResDto> assembler) {
         Page<Lecture> lecturePage = this.lectureRepository.findAll(pageable);
+        // Page<Lecture> => Page<LectureResDto> 변환
         Page<LectureResDto> lectureResDtoPage =
                 //Page<U> map(Function<? super T,? extends U> converter)
                 lecturePage.map(lecture -> modelMapper.map(lecture, LectureResDto.class));
-        return ResponseEntity.ok(lecturePage);
+        // Page<LectureResDto> => HATEOAS PagedModel 로 변환
+        //PagedModel<EntityModel<LectureResDto>> pagedResources = assembler.toModel(lectureResDtoPage);
+
+        //2번째 인자 => RepresentationModelAssembler 의 D toModel(T entity)
+        // T = LectureResDto, D = LectureResource
+        //assembler.toModel(lectureResDtoPage,resDto -> new LectureResource(resDto));
+        PagedModel<LectureResource> pagedModel =
+                assembler.toModel(lectureResDtoPage, LectureResource::new);
+        return ResponseEntity.ok(pagedModel);
     }
 
     private static ResponseEntity<?> getErrors(Errors errors) {
