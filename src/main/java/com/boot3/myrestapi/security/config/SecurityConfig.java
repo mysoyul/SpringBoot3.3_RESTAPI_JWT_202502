@@ -29,7 +29,7 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> {
                     ///users/welcome Path는 허용함 (인증이 필요없음)
-                    auth.requestMatchers("/users/welcome").permitAll()
+                    auth.requestMatchers("/users/**").permitAll()
                             ///api/lectures/ Path는 인증이 필요함
                             .requestMatchers("/api/lectures/**").authenticated();
                 })
